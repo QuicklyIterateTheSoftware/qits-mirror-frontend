@@ -1,6 +1,7 @@
 import { provideBrowserGlobalErrorListeners, type ApplicationConfig } from '@angular/core';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { provideQitsBearerSignIn, qitsBearerInterceptor } from '@qits/angular';
 import {
   provideQitsBuilds,
   provideQitsNavigation,
@@ -11,7 +12,7 @@ import {
 import { routes } from './app.routes';
 
 /**
- * Seven providers, in the order every sibling repeats.
+ * Eight providers, in the order every sibling repeats.
  *
  * - `provideBrowserGlobalErrorListeners` funnels genuinely-global errors and unhandled rejections
  *   into Angular's `ErrorHandler`.
@@ -20,7 +21,11 @@ import { routes } from './app.routes';
  * - `withFetch` is not a preference. The default XHR backend is invisible to OTLP fetch
  *   instrumentation, so choosing it would quietly forfeit client spans the moment this deployment
  *   grows a telemetry relay. Every call this app makes is a same-origin path behind the gateway,
- *   and these reads carry no credential.
+ *   and these reads carry the bearer `qitsBearerInterceptor` attaches (epic qits-543) rather than a
+ *   credential of their own.
+ * - `provideQitsBearerSignIn` wires the sign-in: token store, refresh, and the `/auth/callback`
+ *   route it prepends to `routes` below. This app has no dev-only environment file, so the
+ *   deployed client id `qits-spa` is also what `ng serve` uses.
  * - `provideQitsNavigation` gives `QitsMainLayout` its left navigation, by asking the edge for
  *   `/main-navigation` once at startup. The tree is the edge's answer — derived from the deployments
  *   it actually routes — not a list compiled into @qits/ui-components; without this provider the
@@ -44,7 +49,8 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withFetch()),
+    provideHttpClient(withFetch(), withInterceptors([qitsBearerInterceptor])),
+    provideQitsBearerSignIn({ clientId: 'qits-spa' }),
     provideQitsNavigation(),
     provideQitsProjects(),
     provideQitsScope('system'),
