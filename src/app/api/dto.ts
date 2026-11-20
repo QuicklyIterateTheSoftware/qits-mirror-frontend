@@ -48,15 +48,3 @@ export interface RepositoryPackagesResponse {
   readonly repository: MirrorRepositoryDto;
   readonly packages: readonly CachedPackageDto[];
 }
-
-/** One mirrored OCI registry. `host` is promised; the rest is whatever the service sends. */
-export interface OciUpstreamDto {
-  /** The host a docker client names — `docker.io`, `ghcr.io`, `quay.io`. */
-  readonly host: string;
-  readonly [field: string]: unknown;
-}
-
-/** The OCI upstreams listing. */
-export interface UpstreamsResponse {
-  readonly upstreams: readonly OciUpstreamDto[];
-}

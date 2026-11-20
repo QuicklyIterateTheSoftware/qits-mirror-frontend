@@ -65,16 +65,6 @@ describe('App', () => {
     http.expectOne('/mirror/api/repositories').flush({ repositories: [] });
   });
 
-  it('routes /upstreams to the upstreams page, still inside the chrome', async () => {
-    const harness = await RouterTestingHarness.create('/upstreams');
-    const layout = harness.routeNativeElement as HTMLElement;
-
-    expect(layout.tagName.toLowerCase()).toBe('qits-main-layout');
-    expect(layout.querySelector('main app-upstreams-page')).not.toBeNull();
-
-    http.expectOne('/mirror/api/upstreams').flush({ upstreams: [] });
-  });
-
   it('draws an unknown URL under /mirror/ as a page, still inside the chrome', async () => {
     const harness = await RouterTestingHarness.create('/nothing-here');
     const layout = harness.routeNativeElement as HTMLElement;

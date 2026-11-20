@@ -4,11 +4,11 @@ import { TestBed } from '@angular/core/testing';
 import { MirrorApi } from './mirror-api';
 
 /**
- * The two paths and the two envelopes, asserted once here so the pages' specs can be about
+ * The repositories path and its envelope, asserted once here so the pages' specs can be about
  * rendering.
  *
- * These are same-origin absolute paths on purpose — the SPA is served at `/mirror/` by the very
- * service it reads from, behind the same gateway, and these reads carry no credential at all.
+ * This is a same-origin absolute path on purpose — the SPA is served at `/mirror/` by the very
+ * service it reads from, behind the same gateway, and this read carries no credential at all.
  *
  * **The backend is being built against this contract in parallel, so this file is where the
  * contract is pinned**: a path or an envelope that changes shape breaks here first, loudly, rather
@@ -54,14 +54,6 @@ describe('MirrorApi', () => {
     expect(row['sizeBytes']).toBeNull();
   });
 
-  it('unwraps the OCI upstreams', async () => {
-    const upstreams = api.upstreams();
-    http
-      .expectOne('/mirror/api/upstreams')
-      .flush({ upstreams: [{ host: 'docker.io' }, { host: 'ghcr.io' }] });
-    await expect(upstreams).resolves.toMatchObject([{ host: 'docker.io' }, { host: 'ghcr.io' }]);
-  });
-
   it('reports a failed read as the failure it is, never as an empty list', async () => {
     const repositories = api.repositories();
     http
@@ -73,9 +65,9 @@ describe('MirrorApi', () => {
     await expect(repositories).rejects.toBeInstanceOf(HttpErrorResponse);
   });
 
-  it('reports an upstream read that never reached the service', async () => {
-    const upstreams = api.upstreams();
-    http.expectOne('/mirror/api/upstreams').error(new ProgressEvent('error'), { status: 0 });
-    await expect(upstreams).rejects.toMatchObject({ status: 0 });
+  it('reports a read that never reached the service', async () => {
+    const repositories = api.repositories();
+    http.expectOne('/mirror/api/repositories').error(new ProgressEvent('error'), { status: 0 });
+    await expect(repositories).rejects.toMatchObject({ status: 0 });
   });
 });

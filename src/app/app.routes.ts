@@ -3,10 +3,10 @@ import { QitsMainLayout } from '@qits/ui-components';
 import { NotFound } from './not-found/not-found';
 import { RepositoriesPage } from './repositories/repositories-page';
 import { RepositoryPage } from './repositories/repository-page';
-import { UpstreamsPage } from './upstreams/upstreams-page';
+import { UpstreamsRedirect } from './upstreams/upstreams-redirect';
 
 /**
- * Two pages, both inside the platform chrome.
+ * Two pages and a hand-off, all inside the platform chrome.
  *
  * `QitsMainLayout` is the **root route component**, not a tag wrapped around each page — the
  * platform's convention, stated in the component's own docs. Mounted this way the bar and the
@@ -18,12 +18,19 @@ import { UpstreamsPage } from './upstreams/upstreams-page';
  * `provideQitsNavigation()` — see app.config.ts — and this client passes no links of its own. The
  * two doors *inside* this app are a sub-menu the shell hands to the layout instead; see app.ts.
  *
- * **Each view is a path segment**, so both are bookmarkable and the back button works with no code.
- * They are siblings rather than a drill-down: cached repositories and mirrored registries are two
- * different questions about the same service, and neither is inside the other.
+ * **`upstreams` is a hand-off, not a page.** The OCI upstreams listing moved to the landing app
+ * (qits-2357), at `<landing origin>/mirror/upstreams`; this route's component, `UpstreamsRedirect`,
+ * draws a short sentence and sends a reader there with a full-document navigation rather than the
+ * router, because the destination is a different Angular application. It keeps its path and its
+ * `ViewNav` entry so the address and the sub-menu link both still work — they just end up somewhere
+ * else now.
  *
- * Both load eagerly. There are two of them, they share every component below them, and a lazy chunk
- * boundary would be ceremony that costs a round trip.
+ * **Each view is a path segment**, so every one is bookmarkable and the back button works with no
+ * code. They are siblings rather than a drill-down: cached repositories and mirrored registries are
+ * two different questions about the same service, and neither is inside the other.
+ *
+ * Every route here loads eagerly. There are only three of them, they share every component below
+ * them, and a lazy chunk boundary would be ceremony that costs a round trip.
  *
  * **Every address here starts at the root**, because this application is served at `/` on its own
  * host. It is a `system` app: its pages are about the platform's caches rather than about one
@@ -40,7 +47,7 @@ export const routes: Routes = [
     children: [
       { path: '', component: RepositoriesPage },
       { path: 'repositories/:repository', component: RepositoryPage },
-      { path: 'upstreams', component: UpstreamsPage },
+      { path: 'upstreams', component: UpstreamsRedirect },
       { path: '**', component: NotFound },
     ],
   },
