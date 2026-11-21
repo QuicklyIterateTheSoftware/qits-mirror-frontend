@@ -7,6 +7,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { provideQitsNavigationLinks } from '@qits/ui-components';
 import { App } from './app';
 import { routes } from './app.routes';
+import { NAVIGATE_AWAY } from './ui/navigate-away';
 
 /**
  * A fixture navigation, not the platform's. `provideQitsNavigationLinks` answers the layout's
@@ -39,6 +40,8 @@ describe('App', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideQitsNavigationLinks(NAV),
+        // The base path hands off to the landing app (qits-2471): watch it, never leave.
+        { provide: NAVIGATE_AWAY, useValue: vi.fn() },
       ],
     });
     http = TestBed.inject(HttpTestingController);
@@ -54,15 +57,14 @@ describe('App', () => {
     expect(shell.children).toHaveLength(1);
   });
 
-  it('routes the base path to the shared layout, with the repositories inside it', async () => {
+  it('routes the base path to the shared layout, with the repositories hand-off inside it', async () => {
     const harness = await RouterTestingHarness.create('/');
     const layout = harness.routeNativeElement as HTMLElement;
 
     expect(layout.tagName.toLowerCase()).toBe('qits-main-layout');
     expect(layout.querySelectorAll('nav a')).toHaveLength(NAV.length);
-    expect(layout.querySelector('main app-repositories-page')).not.toBeNull();
-
-    http.expectOne('/mirror/api/repositories').flush({ repositories: [] });
+    expect(layout.querySelector('main app-repositories-redirect')).not.toBeNull();
+    http.verify();
   });
 
   it('draws an unknown URL under /mirror/ as a page, still inside the chrome', async () => {

@@ -1,40 +1,15 @@
 # qits-mirror-platform-frontend
 
-The mirror explorer: what this platform has pulled through its caches, and which registries it
-fronts. Served by qits-platform-mirror itself at `/` on `mirror.<env>.<domain>` through Quinoa —
-the same host dockerd, npm and maven already dial. Two pages, and both of them are read.
+The old mirror explorer, now only hand-offs. Served by qits-mirror itself at `/` on
+`mirror.<domain>` through Quinoa. Every page moved to the landing app's Mirror section, and each
+route here sends a reader there with a full-document load, so bookmarks still land:
 
-- **`/`** — every cached repository, with the wire type that says which format it fronts:
-  `npm-proxy`, `maven-proxy`, `oci-mirror`.
-- **`/upstreams`** — the OCI registries this mirror fronts, as rows of `oci_mirror_upstream`.
+- **`/`** → `<landing>/mirror/repositories`, every cache root (qits-2471).
+- **`/repositories/<name>`** → `<landing>/mirror/repositories/<name>`, one cache root (qits-2358).
+- **`/upstreams`** → `<landing>/mirror/upstreams`, the OCI registries it fronts (qits-2357).
 
-**This is the mirror, not the store.** Nothing here was published to this platform: every byte came
-from npmjs, Maven Central or a mirrored image registry, and can be fetched again — which is what
-lets a nightly eviction run drop whatever nobody has asked for lately. What the platform publishes
-itself lives in qits-artifacts, at `/artifacts/`, with its own explorer.
-
-**Only OCI has an upstreams page, and that is the design rather than an omission.** npm and maven
-have one upstream each and it is a deployment setting on the service. Which _image_ registries are
-mirrored is a set an operator changes, so the service holds it in a table — and a set that lives
-only in configuration is a set nobody can look at. This is the looking.
-
-**A failed read is drawn as a failure, never as an empty mirror.** The two states lead an operator
-in opposite directions: "nothing has been pulled through yet" is a quiet morning, "nobody answered"
-is an incident. So an error renders as an error, with its reason and a retry, and no table is drawn
-beside it. `src/app/ui/loadable.ts` exists for that one distinction.
-
-**Fields this client was never told about are drawn, not dropped.** The contract promises `name` and
-`type` on a repository and `host` on an upstream. The service is being built alongside this client
-and will grow item counts, sizes and last-hit times before either has a reason to release, so
-anything extra in a row gets a column of its own, headed by its own field name and rendered by what
-the value _is_ — a number stays a number, never a byte figure with a unit this client guessed. See
-`src/app/ui/extras.ts`; the restraint is the point.
-
-`src/app/api/` holds hand-written interfaces mirroring the service's wire shapes and one injectable
-over `HttpClient` on the fetch backend. Nothing is generated: the platform generates OpenAPI
-documents rather than clients.
-
-## How it is served
+The landing origin comes from the platform navigation (`src/app/ui/landing-origin.ts`), with a
+bounded wait; the navigation itself is `src/app/ui/navigate-away.ts`, a token a spec replaces.
 
 qits-mirror-platform-service carries this repository as a git submodule at
 `service/src/main/webui` — Quinoa's `web-ui-dir` — and builds it during `mvn package`, serving the

@@ -1,12 +1,13 @@
 import type { Routes } from '@angular/router';
 import { QitsMainLayout } from '@qits/ui-components';
 import { NotFound } from './not-found/not-found';
-import { RepositoriesPage } from './repositories/repositories-page';
+import { RepositoriesRedirect } from './repositories/repositories-redirect';
 import { RepositoryRedirect } from './repositories/repository-redirect';
 import { UpstreamsRedirect } from './upstreams/upstreams-redirect';
 
 /**
- * One page and two hand-offs, all inside the platform chrome.
+ * Three hand-offs, all inside the platform chrome: every page of this app moved to the landing
+ * app.
  *
  * `QitsMainLayout` is the **root route component**, not a tag wrapped around each page — the
  * platform's convention, stated in the component's own docs. Mounted this way the bar and the
@@ -27,10 +28,11 @@ import { UpstreamsRedirect } from './upstreams/upstreams-redirect';
  *
  * **`repositories/:repository` is a hand-off too.** One cached repository's own page moved to the
  * landing app (qits-2358), at `<landing origin>/mirror/repositories/<encodeURIComponent(name)>`;
- * `RepositoryRedirect` is the same shape of hand-off as `UpstreamsRedirect`. `''`, the
- * cached-repositories listing, stays here until qits-2471 — its rows still link into
- * `repositories/:repository`, which now sends a reader on to the landing app instead of rendering
- * here.
+ * `RepositoryRedirect` is the same shape of hand-off as `UpstreamsRedirect`.
+ *
+ * **`''` is a hand-off too.** The cached-repositories listing moved to the landing app
+ * (qits-2471), at `<landing origin>/mirror/repositories`; `RepositoriesRedirect` sends a reader
+ * there the same way.
  *
  * **Each view is a path segment**, so every one is bookmarkable and the back button works with no
  * code. They are siblings rather than a drill-down: cached repositories and mirrored registries are
@@ -52,7 +54,7 @@ export const routes: Routes = [
     path: '',
     component: QitsMainLayout,
     children: [
-      { path: '', component: RepositoriesPage },
+      { path: '', component: RepositoriesRedirect },
       { path: 'repositories/:repository', component: RepositoryRedirect },
       { path: 'upstreams', component: UpstreamsRedirect },
       { path: '**', component: NotFound },
