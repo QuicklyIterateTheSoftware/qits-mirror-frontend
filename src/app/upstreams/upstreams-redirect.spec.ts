@@ -6,8 +6,9 @@ import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideQitsNavigation, provideQitsNavigationTree } from '@qits/ui-components';
 import { routes } from '../app.routes';
+import { LANDING_ORIGIN_WAIT_MS } from '../ui/landing-origin';
 import { NAVIGATE_AWAY } from '../ui/navigate-away';
-import { LANDING_ORIGIN_WAIT_MS, UpstreamsRedirect } from './upstreams-redirect';
+import { UpstreamsRedirect } from './upstreams-redirect';
 
 /** Where the fixture navigation says `qits-landing` answers — its own host, not this one. */
 const LANDING_ORIGIN = 'https://landing.qits.example';

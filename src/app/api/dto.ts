@@ -27,24 +27,3 @@ export interface MirrorRepositoryDto {
 export interface RepositoriesResponse {
   readonly repositories: readonly MirrorRepositoryDto[];
 }
-
-export interface CachedPackageVersionDto {
-  readonly version: string;
-  readonly labels: readonly string[];
-  readonly files: readonly string[];
-  readonly sizeBytes: number;
-  readonly cachedAt: string;
-  readonly lastAccessedAt: string | null;
-}
-
-export interface CachedPackageDto {
-  readonly name: string;
-  readonly versions: readonly CachedPackageVersionDto[];
-  readonly sizeBytes: number;
-  readonly lastAccessedAt: string | null;
-}
-
-export interface RepositoryPackagesResponse {
-  readonly repository: MirrorRepositoryDto;
-  readonly packages: readonly CachedPackageDto[];
-}

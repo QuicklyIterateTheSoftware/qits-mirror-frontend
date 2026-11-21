@@ -2,11 +2,11 @@ import type { Routes } from '@angular/router';
 import { QitsMainLayout } from '@qits/ui-components';
 import { NotFound } from './not-found/not-found';
 import { RepositoriesPage } from './repositories/repositories-page';
-import { RepositoryPage } from './repositories/repository-page';
+import { RepositoryRedirect } from './repositories/repository-redirect';
 import { UpstreamsRedirect } from './upstreams/upstreams-redirect';
 
 /**
- * Two pages and a hand-off, all inside the platform chrome.
+ * One page and two hand-offs, all inside the platform chrome.
  *
  * `QitsMainLayout` is the **root route component**, not a tag wrapped around each page — the
  * platform's convention, stated in the component's own docs. Mounted this way the bar and the
@@ -25,11 +25,18 @@ import { UpstreamsRedirect } from './upstreams/upstreams-redirect';
  * `ViewNav` entry so the address and the sub-menu link both still work — they just end up somewhere
  * else now.
  *
+ * **`repositories/:repository` is a hand-off too.** One cached repository's own page moved to the
+ * landing app (qits-2358), at `<landing origin>/mirror/repositories/<encodeURIComponent(name)>`;
+ * `RepositoryRedirect` is the same shape of hand-off as `UpstreamsRedirect`. `''`, the
+ * cached-repositories listing, stays here until qits-2471 — its rows still link into
+ * `repositories/:repository`, which now sends a reader on to the landing app instead of rendering
+ * here.
+ *
  * **Each view is a path segment**, so every one is bookmarkable and the back button works with no
  * code. They are siblings rather than a drill-down: cached repositories and mirrored registries are
  * two different questions about the same service, and neither is inside the other.
  *
- * Every route here loads eagerly. There are only three of them, they share every component below
+ * Every route here loads eagerly. There are only four of them, they share every component below
  * them, and a lazy chunk boundary would be ceremony that costs a round trip.
  *
  * **Every address here starts at the root**, because this application is served at `/` on its own
@@ -46,7 +53,7 @@ export const routes: Routes = [
     component: QitsMainLayout,
     children: [
       { path: '', component: RepositoriesPage },
-      { path: 'repositories/:repository', component: RepositoryPage },
+      { path: 'repositories/:repository', component: RepositoryRedirect },
       { path: 'upstreams', component: UpstreamsRedirect },
       { path: '**', component: NotFound },
     ],
